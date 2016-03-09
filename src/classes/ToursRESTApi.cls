@@ -69,7 +69,44 @@ public with sharing class ToursRESTApi {
 
 	public void getTours(string accountID) {
 		checkToken();
-		//
+    	if(accessToken != null && accountID != null && accountID != '' && errorResult == null) {
+	    	HttpRequest req = new HttpRequest();
+	    	req.setEndpoint(toursURL);
+	    	req.setMethod('POST');
+	    	req.setHeader('Authorization', 'Bearer' + accessToken.access_token__c);
+	    	req.setBody(JSON.serialize(new Map<String, Object>{
+	        	'accountID'=>accountID
+	    	}));
+
+	    	Http http = new Http();
+	    	try {
+	    		HTTPResponse res = http.send(req);
+	    		if(res.getBody().contains('errorMessage')) {
+	    			errorResult = (ErrorDTO)JSON.deserialize(res.getBody(), ErrorDTO.class);
+    			}
+    			else {
+		    		toursResult = (ToursDTO)JSON.deserialize(res.getBody(), ToursDTO.class);
+    			}
+	    	}
+	    	catch (Exception e) {
+    			errorResult = new ErrorDTO();
+    			errorResult.error = 'connection_error';
+    			errorResult.errorMessage = 'Service not avaliable';    	    		
+	    	}
+	    	
+    	}
+    	else {
+    		if(accessToken == null) {
+				errorResult = new ErrorDTO();
+				errorResult.error = 'no_access_token';
+				errorResult.errorMessage = 'Can\'t connect to service'; 	
+    		}
+    		else if(errorResult == null) {
+				errorResult = new ErrorDTO();
+				errorResult.error = 'no_accountID';
+				errorResult.errorMessage = 'Specify correct Account';    			
+    		}
+    	}
 		updateToken();
 	}
 
