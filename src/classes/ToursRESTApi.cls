@@ -57,7 +57,7 @@ public with sharing class ToursRESTApi {
     	errorResult = null;
     	HttpRequest req = new HttpRequest();
     	req.setEndpoint(tokenURL);
-    	req.setMethod('POST');
+    	req.setMethod('GET');
     	Http http = new Http();
     	try {
     		HTTPResponse res = http.send(req);
@@ -96,12 +96,9 @@ public with sharing class ToursRESTApi {
     	checkToken();
     	if(accessToken != null && accountID != null && accountID != '' && errorResult == null) {
 	    	HttpRequest req = new HttpRequest();
-	    	req.setEndpoint(toursURL);
-	    	req.setMethod('POST');
-	    	req.setHeader('Authorization', 'Bearer' + accessToken.access_token__c);
-	    	req.setBody(JSON.serialize(new Map<String, Object>{
-	        	'accountID'=>accountID
-	    	}));
+	    	req.setEndpoint(toursURL + '?accountID=' + accountID);
+	    	req.setMethod('GET');
+	    	req.setHeader('Authorization', accessToken.token_type__c + accessToken.access_token__c);
 
 	    	Http http = new Http();
 	    	try {
