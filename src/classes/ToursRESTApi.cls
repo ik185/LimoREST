@@ -1,4 +1,5 @@
 public with sharing class ToursRESTApi {
+
     private final string tokenURL = 'https://backend.universal-limo.com/api/v2/oauth/token';
     private final string toursURL = 'https://backend.universal-limo.com/api/v2/tours';
 
@@ -29,6 +30,8 @@ public with sharing class ToursRESTApi {
     	public String errorMessage { get; set; }
     }
 
+    public class myException extends Exception {}
+
     public void checkToken() {
     	access_token__c	AC = access_token__c.getInstance('ToursRESTApi');
     	if( AC == null || (Datetime.now() >= AC.created_at__c.addSeconds(Integer.valueof(AC.expires_in__c*1000)))) {
@@ -46,8 +49,9 @@ public with sharing class ToursRESTApi {
     	}
     	else {
 			accessToken = AC;
-    	}    	
-    }
+    	}
+
+    } 
 
     public TokenDTO getToken() {
     	errorResult = null;
@@ -57,18 +61,39 @@ public with sharing class ToursRESTApi {
     	Http http = new Http();
     	try {
     		HTTPResponse res = http.send(req);
-        	TokenDTO result = (TokenDTO)JSON.deserialize(res.getBody(), TokenDTO.class);
-        	return result;
+    		if(res.getStatusCode() == 200 || res.getStatusCode() == 201) {
+	        	TokenDTO result = (TokenDTO)JSON.deserializeStrict(res.getBody(), TokenDTO.class);
+	        	return result;
+    		}
+    		else {
+    			throw new myException('Status code');
+    		}
+
     	} catch(Exception e) {
 			errorResult = new ErrorDTO();
 			errorResult.error = 'no_access_token';
 			errorResult.errorMessage = 'Can\'t obtain access token';    		
       		return null;
     	}  
-	}
+    	
+  		 
 
-	public void getTours(string accountID) {
-		checkToken();
+    }
+
+    public void updateToken() {
+    	if(accessToken != null) {
+	    	access_token__c at = new access_token__c();
+			at.Name = 'ToursRESTApi';
+			at.access_token__c = accessToken.access_token__c;
+			at.token_type__c = accessToken.token_type__c;
+			at.expires_in__c = accessToken.expires_in__c;
+			at.created_at__c = accessToken.created_at__c;
+			upsert at accesstoken__c.Name;   
+    	}
+    }
+
+    public void getTours(string accountID) {
+    	checkToken();
     	if(accessToken != null && accountID != null && accountID != '' && errorResult == null) {
 	    	HttpRequest req = new HttpRequest();
 	    	req.setEndpoint(toursURL);
@@ -81,11 +106,16 @@ public with sharing class ToursRESTApi {
 	    	Http http = new Http();
 	    	try {
 	    		HTTPResponse res = http.send(req);
-	    		if(res.getBody().contains('errorMessage')) {
-	    			errorResult = (ErrorDTO)JSON.deserialize(res.getBody(), ErrorDTO.class);
+    			if(res.getStatusCode() == 200 || res.getStatusCode() == 201) {
+		    		if(res.getBody().contains('errorMessage')) {
+		    			errorResult = (ErrorDTO)JSON.deserializeStrict(res.getBody(), ErrorDTO.class);
+	    			}
+	    			else {
+			    		toursResult = (ToursDTO)JSON.deserializeStrict(res.getBody(), ToursDTO.class);
+	    			}
     			}
     			else {
-		    		toursResult = (ToursDTO)JSON.deserialize(res.getBody(), ToursDTO.class);
+    				throw new myException('Status code');
     			}
 	    	}
 	    	catch (Exception e) {
@@ -108,21 +138,15 @@ public with sharing class ToursRESTApi {
     		}
     	}
 		updateToken();
-	}
-
-	public void updateToken() {
-    	if(accessToken != null) {
-	    	access_token__c at = new access_token__c();
-			at.Name = 'ToursRESTApi';
-			at.access_token__c = accessToken.access_token__c;
-			at.token_type__c = accessToken.token_type__c;
-			at.expires_in__c = accessToken.expires_in__c;
-			at.created_at__c = accessToken.created_at__c;
-			upsert at accesstoken__c.Name;   
-    	}
-	}
+    }
 
 	public ToursRESTApi() {
-		
 	}
+
+	public ToursRESTApi(Boolean tokenCheck) {
+		if(tokenCheck == true) {
+			checkToken();
+		}
+	}
+
 }
