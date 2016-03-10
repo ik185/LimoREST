@@ -14,8 +14,8 @@ public class ToursRESTApiTest{
 
         Map<String, HttpCalloutMock> endpoint2TestResp =
                                    new Map<String,HttpCalloutMock>();
-        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/oauth/token',accessTokenRespond);
-        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/tours',toursRespond);
+        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/oauth/token', accessTokenRespond);
+        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/tours?accountID=' + testAccId, toursRespond);
 
         HttpCalloutMock multiCalloutMock =
                                    new MultiRequestMock(endpoint2TestResp);
@@ -42,7 +42,7 @@ public class ToursRESTApiTest{
         Map<String, HttpCalloutMock> endpoint2TestResp =
                                    new Map<String,HttpCalloutMock>();
         endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/oauth/token',accessTokenRespond);
-        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/tours',toursRespond);
+        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/tours?accountID=' + testAccId, toursRespond);
 
         HttpCalloutMock multiCalloutMock =
                                    new MultiRequestMock(endpoint2TestResp);
@@ -69,7 +69,7 @@ public class ToursRESTApiTest{
         Map<String, HttpCalloutMock> endpoint2TestResp =
                                    new Map<String,HttpCalloutMock>();
         endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/oauth/token',accessTokenRespond);
-        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/tours',toursRespond);
+        endpoint2TestResp.put('https://backend.universal-limo.com/api/v2/tours?accountID=' + testAccId, toursRespond);
 
         HttpCalloutMock multiCalloutMock =
                                    new MultiRequestMock(endpoint2TestResp);
