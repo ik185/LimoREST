@@ -1,0 +1,19 @@
+<apex:page standardController="Case" extensions="ViewToursController">  
+    <apex:form >
+	    <script>
+			onload();
+		</script>
+    	<apex:actionFunction name="onload" action="{!getToursList}" status="toursStatus" reRender="ToursSection"/>
+    	<apex:actionStatus id="toursStatus" startText="Loading tours..."/>
+
+
+        <apex:outputPanel id="ToursSection">
+            <b><apex:messages/></b> 
+            <apex:outputPanel rendered="{!api.toursResult != null && api.toursResult.Tours != null}">
+                <apex:repeat var="t" value="{!api.toursResult.Tours}" >
+                    {t.bookingNr} &nbsp; {t.timeLocale} &nbsp; {t.driverID} &nbsp; {t.destination} <br/>
+                </apex:repeat>            
+            </apex:outputPanel>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>
